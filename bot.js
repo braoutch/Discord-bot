@@ -1,11 +1,15 @@
 const Discord = require("discord.js")
+const TokenFile = require("./auth.json")
+var token = TokenFile.token
+
+
 const bot = new Discord.Client()
 
-bot.login('NzAwODE4NzEzMzAwOTU5MzUy.XpofJQ.aqJvOHAOagOdCP832cLDSTS2rtE')
+bot.login(token)
 
 bot.on("message", msg => {
   if (!msg.content.startsWith("Waiting for")) {
-msg.channel.send("Waiting for colasv...")
+msg.channel.send("Waiting for @ColasV...")
  }
 })
 
