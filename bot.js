@@ -1,7 +1,7 @@
 const Discord = require("discord.js")
 const TokenFile = require("./auth.json")
 var token = TokenFile.token
-import GameClient from './gameclient'
+const GameClient = require ("./gameClient.js")
 
 const bot = new Discord.Client()
 const gameclient = new GameClient()
