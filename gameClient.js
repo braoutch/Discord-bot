@@ -9,15 +9,20 @@ const SendReponseRequest = {
 }
 
 class GameClient {
-    constructor( ) {
-        this.socket = io.connect('https://localhost:8080')
+    constructor() {
+        this.socket = io('http://localhost:8080')
+        console.log("Socket object created.")
     }
     NewGame(channel) {
-        $('#poke').click(function () {
-            socket.emit('message', 'Salut serveur, ça va ?');
+        this.socket.emit("I want to play.")
+
+        this.socket.on('error', function (message) {
+            console.log("Error : " + error)
         })
 
-        socket.on('GameAvailable', function (message) {
+        this.socket.on('GameAvailable', function (message) {
+            console.log("Game available !")
+            this.socket.emit('message', "Ill take this game.");
 
             const GetSetRequest = {
                 //hostname: 'dcdl-backend.azurewebsites.net',
@@ -53,9 +58,7 @@ class GameClient {
             req.end()
         })
         for (const [memberId, member] of channel.members) {
-            $('#poke').click(function () {
-                socket.emit('message', "discord" + memberId, "");
-            })
+            this.socket.emit('message', "discord" + memberId, "");
         }
     }
 

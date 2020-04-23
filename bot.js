@@ -9,8 +9,8 @@ var isPlaying = false
 bot.login(token)
 
 bot.on("message", msg => {
-  if (msg.content.startsWith("Waiting for")) {
-    msg.channel.send("Waiting for @ColasV...")
+  if (msg.content.startsWith("Waiting for") && msg.content != "Waiting for ColasV...") {
+    msg.channel.send("Waiting for ColasV...")
   }
 
   if (msg.content === "play") {
