@@ -8,6 +8,7 @@ var isPlaying = false
 bot.login(token)
 
 const https = require('https')
+const http = require('http')
 var io = require('socket.io-client')
 var socket = io('http://localhost:8080')
 
@@ -47,34 +48,38 @@ socket.on('GameAvailable', function (message) {
 
     const GetSetRequest = {
       //hostname: 'dcdl-backend.azurewebsites.net',
-      hostname: 'localhost:8080',
-      port: 443,
+      hostname: 'localhost',
+      port: 8080,
       path: '/sets/' + message,
-      method: 'GET'
+      method: 'GET',
+      rejectUnauthorized:false
     }
+    console.log("request sent to " + GetSetRequest.path)
 
-    const req = https.request(GetSetRequest, res => {
+    const req = http.request(GetSetRequest, res => {
       console.log(`statusCode: ${res.statusCode}`)
-
+      res.setEncoding('utf8');
+      
       res.on('data', d => {
         {
-          console.log(d)
-
-          if (d.mode === "numbers") {
-            let target = d.question.split(",")[0]
-            let numbers = d.question.split(",").shift().toString()
+          //console.log("THIS IS : " + d)
+          let response = JSON.parse(d)
+          if (response.mode === "numbers") {
+            let target = response.question.split(",")[0]
+            let numbers = response.question.split(",").shift().toString()
             channel.send("New set of numbers " + numbers + ". The target is " + target + " ! ")
           }
-          else if (d.mode === "letters") {
-            channel.send("New set of letters : " + d.question)
+          else if (response.mode === "letters") {
+            channel.send("New set of letters : " + response.question)
           }
         }
       })
     })
 
     req.on('error', error => {
-      console.error(error)
+      console.error("This is an error : " + error)
     })
+    console.log(req.path)
 
     req.end()
 

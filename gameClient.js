@@ -1,4 +1,5 @@
-// const https = require('https')
+const https = require('https')
+const http = require('http')
 // var io = require('socket.io-client')
 var socket
 
@@ -19,11 +20,37 @@ socket = s
     SendResponse(msg) {
         const SendReponseRequest = {
             //hostname: 'dcdl-backend.azurewebsites.net',
-            hostname: 'localhost:8080',
-            port: 443,
+            hostname: 'localhost',
+            port: 8080,
             path: '/actions',
-            method: 'GET'
+            method: 'POST'
         }
+
+
+        const req = https.request(SendReponseRequest, res => {
+            console.log(`statusCode: ${res.statusCode}`)
+      
+            res.on('data', d => {
+              {
+                console.log(d)
+      
+                if (d.mode === "numbers") {
+                  let target = d.question.split(",")[0]
+                  let numbers = d.question.split(",").shift().toString()
+                  channel.send("New set of numbers " + numbers + ". The target is " + target + " ! ")
+                }
+                else if (d.mode === "letters") {
+                  channel.send("New set of letters : " + d.question)
+                }
+              }
+            })
+          })
+      
+          req.on('error', error => {
+            console.error(error)
+          })
+      
+          req.end()
     }
 }
 module.exports = GameClient 
