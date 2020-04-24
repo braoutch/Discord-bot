@@ -29,15 +29,14 @@ bot.on("message", msg => {
   }
 
   if (msg.content === "play") {
-    msg.channel.send("New game started ! to respond, type r: and to stop the game, to end type stop.")
+    msg.channel.send("New game started ! to respond, type r: and to stop the game, to end type stop. You'll have 50 seconds to respond.")
+    msg.channel.send("The next round will begin soon. Be ready...")
     isPlaying = true
     gameclient.NewGame(msg.channel)
   }
 
-  if (isPlaying) 
-  {
-    if (msg.content === "stop") 
-    {
+  if (isPlaying) {
+    if (msg.content === "stop") {
       msg.channel.send("It's over now.")
       gameclient.GameOver(msg.channel)
       isPlaying = false
@@ -79,7 +78,8 @@ socket.on('GameAvailable', function (setId, roomId) {
           else if (set.mode === "letters") {
             channel.send("New set of letters : " + set.question)
           }
-          gameclient.RegisterCurrentSet(roomId,set.setId)
+          setTimeout(channel.send, "10 seconds left !")
+          gameclient.RegisterCurrentSet(roomId, set.setId)
         }
       })
     })
@@ -96,6 +96,8 @@ socket.on('GameAvailable', function (setId, roomId) {
 
 socket.on('GameOver', function (setId, roomId) {
   var channel = bot.channels.cache.get(roomId)
+  if (channel == undefined)
+    return
   GetSetRequest.path = "/sets/" + setId
   //console.log("request sending to " + GetSetRequest.path)
 
@@ -117,10 +119,12 @@ socket.on('GameOver', function (setId, roomId) {
             score = player.score
           }
         }
-        if(winners.length>0)
-        channel.send("Winners : " + winners.toString() + " with a score of " + score)
+        if (winners.length > 0)
+          channel.send("Winners : " + winners.toString() + " with a score of " + score)
         else
-        channel.send("No one wins this ! ")
+          channel.send("No one wins this ! ")
+          channel.send("The next game should begin in 10 seconds.")
+
       }
     })
   })
