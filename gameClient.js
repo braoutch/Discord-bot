@@ -32,8 +32,8 @@ class GameClient {
     console.log("Received response from " + playerId)
 
     const SendReponseRequest = {
-      //hostname: 'dcdl-backend.azurewebsites.net',
-      hostname: 'dcdl.azurewebsites.net',
+      //hostname: 'dcdlbackend-backend.azurewebsites.net',
+      hostname: 'dcdlbackend.azurewebsites.net',
       //port: 8080,
       path: '/actions',
       method: 'POST',

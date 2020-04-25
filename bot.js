@@ -9,13 +9,13 @@ bot.login(token)
 const https = require('https')
 const http = require('http')
 var io = require('socket.io-client')
-var socket = io('https://dcdl.azurewebsites.net')
+var socket = io('https://dcdlbackend.azurewebsites.net')
 
 const gameclient = new GameClient(socket)
 
 const GetSetRequest = {
-  //hostname: 'dcdl-backend.azurewebsites.net',
-  hostname: 'dcdl.azurewebsites.net',
+  //hostname: 'dcdlbackend-backend.azurewebsites.net',
+  hostname: 'dcdlbackend.azurewebsites.net',
   //port: 8080,
   path: '',
   method: 'GET',
