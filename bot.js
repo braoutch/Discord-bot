@@ -9,14 +9,14 @@ bot.login(token)
 const https = require('https')
 const http = require('http')
 var io = require('socket.io-client')
-var socket = io('http://localhost:8080')
+var socket = io('https://dcdl.azurewebsites.net')
 
 const gameclient = new GameClient(socket)
 
 const GetSetRequest = {
   //hostname: 'dcdl-backend.azurewebsites.net',
-  hostname: 'localhost',
-  port: 8080,
+  hostname: 'dcdl.azurewebsites.net',
+  //port: 8080,
   path: '',
   method: 'GET',
   rejectUnauthorized: false
@@ -53,7 +53,7 @@ socket.on('GameAvailable', function (setId, roomId) {
     
     //console.log("request sending to " + GetSetRequest.path)
 
-    const req = http.request(GetSetRequest, res => {
+    const req = https.request(GetSetRequest, res => {
       //console.log(`statusCode: ${res.statusCode}`)
       res.setEncoding('utf8');
 
@@ -93,7 +93,7 @@ socket.on('GameOver', function (setId, roomId) {
   GetSetRequest.path = "/sets/" + setId
   //console.log("request sending to " + GetSetRequest.path)
 
-  const req = http.request(GetSetRequest, res => {
+  const req = https.request(GetSetRequest, res => {
     //console.log(`statusCode: ${res.statusCode}`)
     res.setEncoding('utf8');
     var winners = []

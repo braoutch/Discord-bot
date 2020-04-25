@@ -34,7 +34,7 @@ class GameClient {
     const SendReponseRequest = {
       //hostname: 'dcdl-backend.azurewebsites.net',
       hostname: 'localhost',
-      port: 8080,
+      //port: 8080,
       path: '/actions',
       method: 'POST',
       rejectUnauthorized: false,
@@ -44,7 +44,7 @@ class GameClient {
       }
     }
 
-    const req = http.request(SendReponseRequest, res => {
+    const req = https.request(SendReponseRequest, res => {
       console.log(`statusCode: ${res.statusCode}`)
       res.setEncoding('utf8');
 
