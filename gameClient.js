@@ -1,12 +1,12 @@
 const https = require('https')
 const http = require('http')
 // var io = require('socket.io-client')
-var socket
+var socket, bot
 var currentSet = {}
 
 class GameClient {
-  constructor(s) {
-    socket = s
+  constructor(pSocket) {
+    socket = pSocket
   }
   NewGame(channel) {
     socket.emit("I want to play.")

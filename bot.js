@@ -4,7 +4,6 @@ var token = TokenFile.token
 const GameClient = require("./gameClient.js")
 
 const bot = new Discord.Client()
-var isPlaying
 bot.login(token)
 
 const https = require('https')
@@ -31,20 +30,15 @@ bot.on("message", msg => {
   if (msg.content === "play") {
     msg.channel.send("New game started ! to respond, type r: and to stop the game, to end type stop. You'll have 50 seconds to respond.")
     msg.channel.send("The next round will begin soon. Be ready...")
-    isPlaying = true
     gameclient.NewGame(msg.channel)
   }
-
-  if (isPlaying) {
     if (msg.content === "stop") {
       msg.channel.send("It's over now.")
       gameclient.GameOver(msg.channel)
-      isPlaying = false
     }
     if (msg.content.startsWith("r:")) {
       gameclient.SendResponse(msg.channel.id, msg.author.id, msg.content.substring(2))
     }
-  }
 })
 
 socket.on('dclc', function (message) {
@@ -52,11 +46,11 @@ socket.on('dclc', function (message) {
 })
 
 socket.on('GameAvailable', function (setId, roomId) {
-  if (isPlaying) {
     console.log("Game available !")
     var channel = bot.channels.cache.get(roomId)
     //socket.emit('message', "Ill take this game.");
     GetSetRequest.path = "/sets/" + setId
+    
     //console.log("request sending to " + GetSetRequest.path)
 
     const req = http.request(GetSetRequest, res => {
@@ -78,7 +72,9 @@ socket.on('GameAvailable', function (setId, roomId) {
           else if (set.mode === "letters") {
             channel.send("New set of letters : " + set.question)
           }
-          setTimeout(channel.send, "10 seconds left !")
+          setTimeout(function () {
+            channel.send("10 seconds left !")
+          }, 40000)
           gameclient.RegisterCurrentSet(roomId, set.setId)
         }
       })
@@ -87,11 +83,7 @@ socket.on('GameAvailable', function (setId, roomId) {
     req.on('error', error => {
       console.error("This is an error : " + error)
     })
-    console.log(req.path)
-
     req.end()
-
-  }
 })
 
 socket.on('GameOver', function (setId, roomId) {
