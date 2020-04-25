@@ -33,7 +33,7 @@ class GameClient {
 
     const SendReponseRequest = {
       //hostname: 'dcdl-backend.azurewebsites.net',
-      hostname: 'localhost',
+      hostname: 'dcdl.azurewebsites.net',
       //port: 8080,
       path: '/actions',
       method: 'POST',
