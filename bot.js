@@ -6,21 +6,35 @@ const GameClient = require("./gameClient.js")
 const bot = new Discord.Client()
 bot.login(token)
 
-const https = require('https')
-const http = require('http')
 var io = require('socket.io-client')
-var socket = io('https://dcdlbackend.azurewebsites.net')
+
+var backendEndpoint
+var socket
+var http
+const isOnline = process.env.ONLINE
+if (isOnline) {
+  backendEndpoint = 'dcdlbackend.azurewebsites.net'
+  socket = io('https://' + backendEndpoint)
+  http = require('https')
+}
+else {
+  backendEndpoint = 'localhost'
+  socket = io('http://' + backendEndpoint + ':8080')
+  http = require('http')
+}
+
+console.log("Backend target endpoint : " + backendEndpoint)
 
 const gameclient = new GameClient(socket)
 
 const GetSetRequest = {
-  //hostname: 'dcdlbackend-backend.azurewebsites.net',
-  hostname: 'dcdlbackend.azurewebsites.net',
-  //port: 8080,
+  hostname: backendEndpoint,
   path: '',
   method: 'GET',
   rejectUnauthorized: false
 }
+if(!isOnline)
+GetSetRequest["port"] = '8080'
 
 bot.on("message", msg => {
   if (msg.content.startsWith("Waiting for") && msg.content != "Waiting for ColasV...") {
@@ -32,13 +46,13 @@ bot.on("message", msg => {
     msg.channel.send("The next round will begin soon. Be ready...")
     gameclient.NewGame(msg.channel)
   }
-    if (msg.content === "stop") {
-      msg.channel.send("It's over now.")
-      gameclient.GameOver(msg.channel)
-    }
-    if (msg.content.startsWith("r:")) {
-      gameclient.SendResponse(msg.channel.id, msg.author.id, msg.content.substring(2))
-    }
+  if (msg.content === "stop") {
+    msg.channel.send("It's over now.")
+    gameclient.GameOver(msg.channel)
+  }
+  if (msg.content.startsWith("r:")) {
+    gameclient.SendResponse(msg.channel.id, msg.author.id, msg.content.substring(2))
+  }
 })
 
 socket.on('dclc', function (message) {
@@ -46,44 +60,44 @@ socket.on('dclc', function (message) {
 })
 
 socket.on('GameAvailable', function (setId, roomId) {
-    console.log("Game available !")
-    var channel = bot.channels.cache.get(roomId)
-    //socket.emit('message', "Ill take this game.");
-    GetSetRequest.path = "/sets/" + setId
-    
-    //console.log("request sending to " + GetSetRequest.path)
+  console.log("Game available !")
+  var channel = bot.channels.cache.get(roomId)
+  //socket.emit('message', "Ill take this game.");
+  GetSetRequest.path = "/sets/" + setId
 
-    const req = https.request(GetSetRequest, res => {
-      //console.log(`statusCode: ${res.statusCode}`)
-      res.setEncoding('utf8');
+  //console.log("request sending to " + GetSetRequest.path)
 
-      res.on('data', d => {
-        {
-          //console.log("THIS IS : " + d)
-          let set = JSON.parse(d)
-          if (set.mode === "numbers") {
-            let question = set.question
-            //console.log(question)
-            let target = question.split(",")[0]
-            let numbers = question.split(",")
-            numbers.shift()
-            channel.send("New set of numbers " + numbers.toString() + ". The target is " + target + " ! ")
-          }
-          else if (set.mode === "letters") {
-            channel.send("New set of letters : " + set.question)
-          }
-          setTimeout(function () {
-            channel.send("10 seconds left !")
-          }, 40000)
-          gameclient.RegisterCurrentSet(roomId, set.setId)
+  const req = http.request(GetSetRequest, res => {
+    //console.log(`statusCode: ${res.statusCode}`)
+    res.setEncoding('utf8');
+
+    res.on('data', d => {
+      {
+        //console.log("THIS IS : " + d)
+        let set = JSON.parse(d)
+        if (set.mode === "numbers") {
+          let question = set.question
+          //console.log(question)
+          let target = question.split(",")[0]
+          let numbers = question.split(",")
+          numbers.shift()
+          channel.send("New set of numbers " + numbers.toString() + ". The target is " + target + " ! ")
         }
-      })
+        else if (set.mode === "letters") {
+          channel.send("New set of letters : " + set.question)
+        }
+        setTimeout(function () {
+          channel.send("10 seconds left !")
+        }, 40000)
+        gameclient.RegisterCurrentSet(roomId, set.setId)
+      }
     })
+  })
 
-    req.on('error', error => {
-      console.error("This is an error : " + error)
-    })
-    req.end()
+  req.on('error', error => {
+    console.error("This is an error : " + error)
+  })
+  req.end()
 })
 
 socket.on('GameOver', function (setId, roomId) {
@@ -93,7 +107,7 @@ socket.on('GameOver', function (setId, roomId) {
   GetSetRequest.path = "/sets/" + setId
   //console.log("request sending to " + GetSetRequest.path)
 
-  const req = https.request(GetSetRequest, res => {
+  const req = http.request(GetSetRequest, res => {
     //console.log(`statusCode: ${res.statusCode}`)
     res.setEncoding('utf8');
     var winners = []
@@ -115,7 +129,7 @@ socket.on('GameOver', function (setId, roomId) {
           channel.send("Winners : " + winners.toString() + " with a score of " + score)
         else
           channel.send("No one wins this ! ")
-          channel.send("The next game should begin in 10 seconds.")
+        channel.send("The next game should begin in 10 seconds.")
 
       }
     })

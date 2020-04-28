@@ -6,15 +6,75 @@
 trigger:
 - master
 
+variables:
+
+  # Azure Resource Manager connection created during pipeline creation
+  azureSubscription: '1a2964dc-39b1-4de1-b75a-0bfff65a3831'
+  
+  # Web app name
+  webAppName: 'discord-dcdl-bot'
+  
+  # Environment name
+  environmentName: 'discord-dcdl-bot'
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '12.x'
-  displayName: 'Install Node.js'
+stages:
+  - stage : Build
+  displayName: Build stage
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
 
-- script: |
-    npm install
-  displayName: 'npm install'
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '12.x'
+      displayName: 'Install Node.js'
+
+    - script: |
+        npm install
+      displayName: 'npm install'
+    
+    - task: ArchiveFiles@2
+          displayName: 'Archive files'
+          inputs:
+            rootFolderOrFile: '$(System.DefaultWorkingDirectory)'
+            includeRootFolder: false
+            archiveType: zip
+            archiveFile: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+            replaceExistingArchive: true
+
+    - upload: $(Build.ArtifactStagingDirectory)/$(Build.BuildId).zip
+          artifact: drop
+
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    environment: $(environmentName)
+    pool: 
+      vmImage: $(vmImageName)
+    strategy:
+      runOnce:
+        deploy:
+          steps:            
+          - task: AzureWebApp@1
+            displayName: 'Azure Web App Deploy: discord-dcdl-bot'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              appType: webAppLinux
+              appName: $(webAppName)
+              runtimeStack: 'NODE|LTS'
+              package: $(Pipeline.Workspace)/drop/$(Build.BuildId).zip
+              startUpCommand: 'node bot.js'
+

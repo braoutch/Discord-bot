@@ -1,8 +1,15 @@
-const https = require('https')
-const http = require('http')
-// var io = require('socket.io-client')
 var socket, bot
 var currentSet = {}
+var backendEndPoint
+const isOnline = process.env.ONLINE
+if (isOnline) {
+  backendEndpoint = 'dcdlbackend.azurewebsites.net'
+  http = require('https')
+}
+else {
+  backendEndpoint = 'localhost'
+  http = require('http')
+}
 
 class GameClient {
   constructor(pSocket) {
@@ -33,8 +40,7 @@ class GameClient {
 
     const SendReponseRequest = {
       //hostname: 'dcdlbackend-backend.azurewebsites.net',
-      hostname: 'dcdlbackend.azurewebsites.net',
-      //port: 8080,
+      hostname: backendEndpoint,
       path: '/actions',
       method: 'POST',
       rejectUnauthorized: false,
@@ -43,8 +49,10 @@ class GameClient {
         'Content-Length': data.length
       }
     }
+    if(!isOnline)
+    SendReponseRequest["port"] = '8080'
 
-    const req = https.request(SendReponseRequest, res => {
+    const req = http.request(SendReponseRequest, res => {
       console.log(`statusCode: ${res.statusCode}`)
       res.setEncoding('utf8');
 
