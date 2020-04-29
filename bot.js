@@ -42,12 +42,12 @@ bot.on("message", msg => {
   }
 
   if (msg.content === "play") {
-    msg.channel.send("New game started ! to respond, type r: and to stop the game, to end type stop. You'll have 50 seconds to respond.")
-    msg.channel.send("The next round will begin soon. Be ready...")
+    msg.channel.send("Partie démarrée ! Commencez votre réponse par \"r:\". Pour arrêtez, tapez \"stop\".")
+    msg.channel.send("La prochaine manche commence bientôt. Soyez prêt...")
     gameclient.NewGame(msg.channel)
   }
   if (msg.content === "stop") {
-    msg.channel.send("It's over now.")
+    msg.channel.send("Ce sera donc la dernière manche.")
     gameclient.GameOver(msg.channel)
   }
   if (msg.content.startsWith("r:")) {
@@ -57,6 +57,11 @@ bot.on("message", msg => {
 
 socket.on('dclc', function (message) {
   console.log("Message from DCLC : " + message)
+})
+
+socket.on('stop', function (roomId) {
+  var channel = bot.channels.cache.get(roomId)
+  channel.send("Cette partie est inactive, elle s'arrête donc.")
 })
 
 socket.on('GameAvailable', function (setId, roomId) {
@@ -81,13 +86,13 @@ socket.on('GameAvailable', function (setId, roomId) {
           let target = question.split(",")[0]
           let numbers = question.split(",")
           numbers.shift()
-          channel.send("New set of numbers " + numbers.toString() + ". The target is " + target + " ! ")
+          channel.send("Nouveau set de chiffres : " + numbers.toString() + ". La cible est " + target + " ! ")
         }
         else if (set.mode === "letters") {
-          channel.send("New set of letters : " + set.question)
+          channel.send("Nouveau set de lettres : " + set.question)
         }
         setTimeout(function () {
-          channel.send("10 seconds left !")
+          channel.send("Plus que 10 secondes !")
         }, 40000)
         gameclient.RegisterCurrentSet(roomId, set.setId)
       }
