@@ -42,7 +42,7 @@ bot.on("message", msg => {
   }
 
   if (msg.content === "play") {
-    msg.channel.send("Partie démarrée ! Commencez votre réponse par \"r:\". Pour arrêtez, tapez \"stop\".")
+    msg.channel.send("Partie démarrée ! Commencez votre réponse par \"r:\". Pour arrêtez, tapez \"stop\". Si vous faites plusieurs réponses, c'est la dernière qui sera prise en compte.")
     msg.channel.send("La prochaine manche commence bientôt. Soyez prêt...")
     gameclient.NewGame(msg.channel)
   }
