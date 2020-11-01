@@ -11,6 +11,6 @@
     "socket.io-client": "2.3.0"
   },
   "scripts": {
-    "start": "node ."
+    "start": "node bot.js"
   }
 }
